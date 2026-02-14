@@ -1,0 +1,151 @@
+import { useState, useRef, useEffect } from "react";
+import "@/types/speech.d.ts";
+import { useMentor } from "@/lib/mentor-context";
+import { streamChat } from "@/lib/ai-stream";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
+import { Card } from "@/components/ui/card";
+import { Send, Mic, MicOff, Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import { toast } from "sonner";
+
+export default function ChatTab() {
+  const { interest, level, chatMessages, setChatMessages, addTopic } = useMentor();
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [temperature, setTemperature] = useState(0.7);
+  const [maxTokens, setMaxTokens] = useState(1024);
+  const [listening, setListening] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<InstanceType<NonNullable<typeof window.SpeechRecognition>> | null>(null);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [chatMessages]);
+
+  const handleSend = async () => {
+    const text = input.trim();
+    if (!text || isLoading) return;
+    setInput("");
+    const userMsg = { role: "user" as const, content: text };
+    setChatMessages((prev) => [...prev, userMsg]);
+    setIsLoading(true);
+
+    addTopic(text.slice(0, 50));
+
+    let assistantContent = "";
+    const updateAssistant = (chunk: string) => {
+      assistantContent += chunk;
+      setChatMessages((prev) => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant") {
+          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantContent } : m));
+        }
+        return [...prev, { role: "assistant", content: assistantContent }];
+      });
+    };
+
+    try {
+      await streamChat({
+        endpoint: "chat",
+        messages: [...chatMessages, userMsg],
+        extra: { interest, level, temperature, max_tokens: maxTokens },
+        onDelta: updateAssistant,
+        onDone: () => setIsLoading(false),
+      });
+    } catch (e: unknown) {
+      setIsLoading(false);
+      toast.error(e instanceof Error ? e.message : "Chat failed");
+    }
+  };
+
+  const toggleVoice = () => {
+    if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+      toast.error("Voice input not supported in this browser");
+      return;
+    }
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+    const recognition = new SR();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.onresult = (e: any) => {
+      setInput((prev) => prev + e.results[0][0].transcript);
+      setListening(false);
+    };
+    recognition.onerror = () => setListening(false);
+    recognition.onend = () => setListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+    setListening(true);
+  };
+
+  return (
+    <div className="flex flex-col h-[calc(100vh-200px)]">
+      {/* Controls */}
+      <div className="flex gap-6 mb-4 flex-wrap text-sm">
+        <div className="flex items-center gap-2 min-w-[200px]">
+          <span className="text-muted-foreground whitespace-nowrap">Creativity:</span>
+          <Slider value={[temperature]} onValueChange={([v]) => setTemperature(v)} min={0} max={1} step={0.1} className="flex-1" />
+          <span className="text-muted-foreground w-8">{temperature}</span>
+        </div>
+        <div className="flex items-center gap-2 min-w-[200px]">
+          <span className="text-muted-foreground whitespace-nowrap">Length:</span>
+          <Slider value={[maxTokens]} onValueChange={([v]) => setMaxTokens(v)} min={256} max={4096} step={256} className="flex-1" />
+          <span className="text-muted-foreground w-12">{maxTokens}</span>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-3 mb-4 pr-1">
+        {chatMessages.length === 0 && (
+          <div className="text-center text-muted-foreground py-20">
+            <p className="text-lg">Ask me anything about <span className="font-medium text-foreground">{interest}</span>!</p>
+            <p className="text-sm mt-1">I'll guide you as your personal AI mentor.</p>
+          </div>
+        )}
+        {chatMessages.map((msg, i) => (
+          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+            <Card className={`max-w-[80%] px-4 py-3 ${msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+              {msg.role === "assistant" ? (
+                <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                </div>
+              ) : (
+                <p>{msg.content}</p>
+              )}
+            </Card>
+          </div>
+        ))}
+        {isLoading && chatMessages[chatMessages.length - 1]?.role !== "assistant" && (
+          <div className="flex justify-start">
+            <Card className="px-4 py-3 bg-muted"><Loader2 className="h-4 w-4 animate-spin" /></Card>
+          </div>
+        )}
+      </div>
+
+      {/* Input */}
+      <div className="flex gap-2">
+        <Button variant="outline" size="icon" onClick={toggleVoice} className={listening ? "text-destructive" : ""}>
+          {listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+        </Button>
+        <Textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask your mentor..."
+          className="min-h-[44px] max-h-[120px] resize-none"
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+        />
+        <Button onClick={handleSend} disabled={isLoading || !input.trim()} size="icon">
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+        </Button>
+      </div>
+    </div>
+  );
+}

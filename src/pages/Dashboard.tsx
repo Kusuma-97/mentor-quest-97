@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMentor } from "@/lib/mentor-context";
+import { useAuth } from "@/lib/auth-context";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Map, HelpCircle, BarChart3, Settings } from "lucide-react";
+import { MessageSquare, Map, HelpCircle, BarChart3, Settings, LogOut } from "lucide-react";
 import ChatTab from "@/components/dashboard/ChatTab";
 import RoadmapTab from "@/components/dashboard/RoadmapTab";
 import QuizTab from "@/components/dashboard/QuizTab";
@@ -14,6 +15,7 @@ import { useState } from "react";
 
 export default function Dashboard() {
   const { interest, level } = useMentor();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("chat");
 
@@ -39,6 +41,9 @@ export default function Dashboard() {
             <Badge variant="outline">{level}</Badge>
             <button onClick={() => navigate("/")} className="ml-2 text-muted-foreground hover:text-foreground transition-colors">
               <Settings className="h-4 w-4" />
+            </button>
+            <button onClick={() => { signOut(); navigate("/auth"); }} className="text-muted-foreground hover:text-foreground transition-colors" title="Sign out">
+              <LogOut className="h-4 w-4" />
             </button>
           </div>
         </motion.header>

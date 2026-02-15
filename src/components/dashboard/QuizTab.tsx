@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, HelpCircle, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Question {
   question: string;
@@ -51,7 +52,7 @@ export default function QuizTab() {
       setCurrent((c) => c + 1);
       setSelected(null);
     } else {
-      const finalScore = selected === questions[current].correct ? score + 0 : score; // already counted
+      const finalScore = selected === questions[current].correct ? score + 0 : score;
       setFinished(true);
       addQuizResult({ topic, score: finalScore || score, total: questions.length, timestamp: Date.now() });
     }
@@ -59,13 +60,20 @@ export default function QuizTab() {
 
   if (questions.length === 0 || finished) {
     return (
-      <div className="text-center py-20">
+      <motion.div className="text-center py-20" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}>
         <HelpCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
         {finished ? (
           <>
             <h2 className="text-xl font-semibold text-foreground mb-2">Quiz Complete!</h2>
             <p className="text-lg text-muted-foreground mb-1">Topic: {topic}</p>
-            <p className="text-2xl font-bold text-foreground mb-6">{score}/{questions.length} correct</p>
+            <motion.p
+              className="text-2xl font-bold text-foreground mb-6"
+              initial={{ scale: 0.5 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 15 }}
+            >
+              {score}/{questions.length} correct
+            </motion.p>
           </>
         ) : (
           <>
@@ -77,7 +85,7 @@ export default function QuizTab() {
           {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
           {finished ? "New Quiz" : "Start Quiz"}
         </Button>
-      </div>
+      </motion.div>
     );
   }
 
@@ -89,43 +97,66 @@ export default function QuizTab() {
         <span>Question {current + 1}/{questions.length}</span>
         <span>Score: {score}</span>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">{q.question}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {q.options.map((opt, i) => {
-            let variant: "outline" | "default" | "destructive" | "secondary" | "ghost" | "link" = "outline";
-            let icon = null;
-            if (selected !== null) {
-              if (i === q.correct) { variant = "default"; icon = <CheckCircle className="h-4 w-4" />; }
-              else if (i === selected) { icon = <XCircle className="h-4 w-4" />; }
-            }
-            return (
-              <Button
-                key={i}
-                variant={variant}
-                className={`w-full justify-start text-left gap-2 ${selected !== null && i === selected && i !== q.correct ? "border-destructive text-destructive" : ""}`}
-                onClick={() => handleAnswer(i)}
-                disabled={selected !== null}
-              >
-                {icon}
-                {opt}
-              </Button>
-            );
-          })}
-          {selected !== null && (
-            <div className="mt-4 p-3 rounded-md bg-muted text-sm text-muted-foreground">
-              <strong>Explanation:</strong> {q.explanation}
-            </div>
-          )}
-          {selected !== null && (
-            <Button className="w-full mt-2" onClick={next}>
-              {current < questions.length - 1 ? "Next Question" : "Finish Quiz"}
-            </Button>
-          )}
-        </CardContent>
-      </Card>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={current}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.25 }}
+        >
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">{q.question}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {q.options.map((opt, i) => {
+                let variant: "outline" | "default" | "destructive" | "secondary" | "ghost" | "link" = "outline";
+                let icon = null;
+                if (selected !== null) {
+                  if (i === q.correct) { variant = "default"; icon = <CheckCircle className="h-4 w-4" />; }
+                  else if (i === selected) { icon = <XCircle className="h-4 w-4" />; }
+                }
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                  >
+                    <Button
+                      variant={variant}
+                      className={`w-full justify-start text-left gap-2 ${selected !== null && i === selected && i !== q.correct ? "border-destructive text-destructive" : ""}`}
+                      onClick={() => handleAnswer(i)}
+                      disabled={selected !== null}
+                    >
+                      {icon}
+                      {opt}
+                    </Button>
+                  </motion.div>
+                );
+              })}
+              <AnimatePresence>
+                {selected !== null && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="mt-4 p-3 rounded-md bg-muted text-sm text-muted-foreground">
+                      <strong>Explanation:</strong> {q.explanation}
+                    </div>
+                    <Button className="w-full mt-2" onClick={next}>
+                      {current < questions.length - 1 ? "Next Question" : "Finish Quiz"}
+                    </Button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

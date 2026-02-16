@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMentor, Interest, Level } from "@/lib/mentor-context";
+import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Code, Database, Brain, Palette, Smartphone, Shield, Sparkles } from "lucide-react";
+import { Code, Database, Brain, Palette, Smartphone, Shield, Sparkles, Home, User, LogOut } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import PageTransition from "@/components/PageTransition";
 import { motion } from "framer-motion";
 
@@ -29,6 +31,7 @@ const fadeUp = {
 
 export default function Onboarding() {
   const { setInterest, setLevel } = useMentor();
+  const { signOut } = useAuth();
   const [selectedInterest, setSelectedInterest] = useState<Interest | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<Level | null>(null);
   const navigate = useNavigate();
@@ -43,6 +46,54 @@ export default function Onboarding() {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background flex flex-col">
+        {/* Top bar with nav icons */}
+        <motion.div
+          className="flex justify-end items-center gap-2 px-4 py-3"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <motion.button
+                onClick={() => navigate("/dashboard")}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Home className="h-4 w-4" />
+              </motion.button>
+            </TooltipTrigger>
+            <TooltipContent>Dashboard</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <motion.button
+                onClick={() => navigate("/profile")}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <User className="h-4 w-4" />
+              </motion.button>
+            </TooltipTrigger>
+            <TooltipContent>Profile</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <motion.button
+                onClick={() => { signOut(); navigate("/auth"); }}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <LogOut className="h-4 w-4" />
+              </motion.button>
+            </TooltipTrigger>
+            <TooltipContent>Sign out</TooltipContent>
+          </Tooltip>
+        </motion.div>
+
         {/* Hero */}
         <motion.header className="text-center py-16 px-4" variants={fadeUp} initial="initial" animate="animate">
           <div className="flex items-center justify-center gap-2 mb-4">

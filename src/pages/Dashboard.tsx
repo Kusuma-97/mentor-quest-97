@@ -1,17 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMentor } from "@/lib/mentor-context";
 import { useAuth } from "@/lib/auth-context";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Map, HelpCircle, BarChart3, Settings, LogOut } from "lucide-react";
+import { MessageSquare, Map, HelpCircle, BarChart3, Home, User, LogOut } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import ChatTab from "@/components/dashboard/ChatTab";
 import RoadmapTab from "@/components/dashboard/RoadmapTab";
 import QuizTab from "@/components/dashboard/QuizTab";
 import ProgressTab from "@/components/dashboard/ProgressTab";
 import PageTransition from "@/components/PageTransition";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
 
 export default function Dashboard() {
   const { interest, level } = useMentor();
@@ -39,23 +39,70 @@ export default function Dashboard() {
           <div className="flex items-center gap-2">
             <Badge variant="secondary">{interest}</Badge>
             <Badge variant="outline">{level}</Badge>
-            <button onClick={() => navigate("/")} className="ml-2 text-muted-foreground hover:text-foreground transition-colors">
-              <Settings className="h-4 w-4" />
-            </button>
-            <button onClick={() => { signOut(); navigate("/auth"); }} className="text-muted-foreground hover:text-foreground transition-colors" title="Sign out">
-              <LogOut className="h-4 w-4" />
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.button
+                  onClick={() => navigate("/")}
+                  className="ml-2 text-muted-foreground hover:text-foreground transition-colors"
+                  whileHover={{ scale: 1.15 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <Home className="h-4 w-4" />
+                </motion.button>
+              </TooltipTrigger>
+              <TooltipContent>Home</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.button
+                  onClick={() => navigate("/profile")}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  whileHover={{ scale: 1.15 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <User className="h-4 w-4" />
+                </motion.button>
+              </TooltipTrigger>
+              <TooltipContent>Profile</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.button
+                  onClick={() => { signOut(); navigate("/auth"); }}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  whileHover={{ scale: 1.15 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <LogOut className="h-4 w-4" />
+                </motion.button>
+              </TooltipTrigger>
+              <TooltipContent>Sign out</TooltipContent>
+            </Tooltip>
           </div>
         </motion.header>
 
         {/* Main */}
         <main className="max-w-5xl mx-auto px-4 py-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full justify-start mb-6">
-              <TabsTrigger value="chat" className="gap-1.5"><MessageSquare className="h-4 w-4" />Chat</TabsTrigger>
-              <TabsTrigger value="roadmap" className="gap-1.5"><Map className="h-4 w-4" />Roadmap</TabsTrigger>
-              <TabsTrigger value="quiz" className="gap-1.5"><HelpCircle className="h-4 w-4" />Quiz</TabsTrigger>
-              <TabsTrigger value="progress" className="gap-1.5"><BarChart3 className="h-4 w-4" />Progress</TabsTrigger>
+            <TabsList className="w-full justify-start mb-6 bg-muted/50 p-1">
+              {[
+                { value: "chat", icon: MessageSquare, label: "Chat" },
+                { value: "roadmap", icon: Map, label: "Roadmap" },
+                { value: "quiz", icon: HelpCircle, label: "Quiz" },
+                { value: "progress", icon: BarChart3, label: "Progress" },
+              ].map(({ value, icon: Icon, label }) => (
+                <TabsTrigger key={value} value={value} className="gap-1.5 relative data-[state=active]:shadow-sm transition-all">
+                  <Icon className="h-4 w-4" />
+                  {label}
+                  {activeTab === value && (
+                    <motion.div
+                      layoutId="activeTabIndicator"
+                      className="absolute inset-0 rounded-md bg-background shadow-sm -z-10"
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                </TabsTrigger>
+              ))}
             </TabsList>
 
             <AnimatePresence mode="wait">

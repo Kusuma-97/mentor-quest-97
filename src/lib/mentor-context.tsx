@@ -29,6 +29,7 @@ interface MentorContextType {
   setLevel: (l: Level) => void;
   chatMessages: ChatMessage[];
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
+  chatsByDomain: Record<string, ChatMessage[]>;
   quizResults: QuizResult[];
   addQuizResult: (r: QuizResult) => void;
   roadmap: RoadmapMilestone[];
@@ -43,10 +44,22 @@ const MentorContext = createContext<MentorContextType | null>(null);
 export function MentorProvider({ children }: { children: React.ReactNode }) {
   const [interest, setInterest] = useState<Interest | null>(null);
   const [level, setLevel] = useState<Level | null>(null);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatsByDomain, setChatsByDomain] = useState<Record<string, ChatMessage[]>>({});
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [roadmap, setRoadmap] = useState<RoadmapMilestone[]>([]);
   const [topicsExplored, setTopicsExplored] = useState<string[]>([]);
+  const domainKey = interest ?? "";
+  const chatMessages = chatsByDomain[domainKey] ?? [];
+  const setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>> = useCallback(
+    (action) => {
+      setChatsByDomain((prev) => {
+        const current = prev[domainKey] ?? [];
+        const next = typeof action === "function" ? action(current) : action;
+        return { ...prev, [domainKey]: next };
+      });
+    },
+    [domainKey]
+  );
 
   const addQuizResult = useCallback((r: QuizResult) => {
     setQuizResults((prev) => [...prev, r]);
@@ -66,7 +79,7 @@ export function MentorProvider({ children }: { children: React.ReactNode }) {
     <MentorContext.Provider
       value={{
         interest, level, setInterest, setLevel,
-        chatMessages, setChatMessages,
+        chatMessages, setChatMessages, chatsByDomain,
         quizResults, addQuizResult,
         roadmap, setRoadmap, toggleMilestone,
         topicsExplored, addTopic,

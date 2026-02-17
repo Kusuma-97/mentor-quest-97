@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Save, Loader2, User } from "lucide-react";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PageTransition from "@/components/PageTransition";
 import { motion } from "framer-motion";
@@ -22,19 +22,9 @@ interface ProfileData {
 }
 
 const academicLevels = [
-  "Elementary School",
-  "Middle School",
-  "High School",
-  "Undergraduate",
-  "Graduate",
-  "Postgraduate",
-  "Professional",
+  "Elementary School", "Middle School", "High School",
+  "Undergraduate", "Graduate", "Postgraduate", "Professional",
 ];
-
-const fadeUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-};
 
 export default function Profile() {
   const { user } = useAuth();
@@ -43,10 +33,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<ProfileData>({
-    display_name: "",
-    bio: "",
-    academic_level: "",
-    avatar_url: "",
+    display_name: "", bio: "", academic_level: "", avatar_url: "",
   });
 
   useEffect(() => {
@@ -91,65 +78,63 @@ export default function Profile() {
   };
 
   const initials = profile.display_name
-    ? profile.display_name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
+    ? profile.display_name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
     : "?";
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background relative overflow-hidden">
+        {/* Background accent */}
+        <div className="absolute top-0 left-0 right-0 h-64 gradient-primary opacity-5 blur-2xl pointer-events-none" />
+
         {/* Header */}
         <motion.header
-          className="border-b bg-card px-4 py-3 flex items-center gap-3"
+          className="border-b bg-card/80 backdrop-blur-md px-4 py-3 flex items-center gap-3 relative z-10"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
           <motion.button
             onClick={() => navigate("/dashboard")}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            whileHover={{ scale: 1.1 }}
+            className="text-muted-foreground hover:text-primary transition-colors"
+            whileHover={{ scale: 1.1, x: -3 }}
             whileTap={{ scale: 0.95 }}
           >
             <ArrowLeft className="h-5 w-5" />
           </motion.button>
-          <h1 className="text-xl font-bold text-foreground">My Profile</h1>
+          <h1 className="text-xl font-bold gradient-text">My Profile</h1>
         </motion.header>
 
-        <main className="max-w-2xl mx-auto px-4 py-8">
-          <motion.div variants={fadeUp} initial="initial" animate="animate" transition={{ duration: 0.4 }}>
-            <Card className="overflow-hidden">
+        <main className="max-w-2xl mx-auto px-4 py-8 relative z-10">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+            <Card className="overflow-hidden glass border-border/50 glow-sm">
               {/* Avatar section */}
               <motion.div
-                className="bg-gradient-to-br from-primary/10 to-accent/30 p-8 flex flex-col items-center gap-4"
+                className="gradient-primary p-8 flex flex-col items-center gap-4"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.1, duration: 0.4 }}
               >
                 <motion.div
-                  whileHover={{ scale: 1.08, rotate: 3 }}
+                  whileHover={{ scale: 1.1, rotate: 5 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
+                  <Avatar className="h-24 w-24 border-4 border-background shadow-xl">
                     <AvatarImage src={profile.avatar_url} />
-                    <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
+                    <AvatarFallback className="text-2xl font-bold bg-background text-primary">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                 </motion.div>
-                <p className="text-sm text-muted-foreground">{user?.email}</p>
+                <p className="text-sm text-primary-foreground/80">{user?.email}</p>
               </motion.div>
 
               <CardHeader>
@@ -157,87 +142,55 @@ export default function Profile() {
                 <CardDescription>Update your personal information</CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
-                {/* Display Name */}
-                <motion.div
-                  className="space-y-2"
-                  initial={{ opacity: 0, x: -15 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.15 }}
-                >
-                  <Label htmlFor="display_name">Display Name</Label>
-                  <Input
-                    id="display_name"
-                    value={profile.display_name}
-                    onChange={(e) => setProfile((p) => ({ ...p, display_name: e.target.value }))}
-                    placeholder="Your name"
-                  />
-                </motion.div>
-
-                {/* Bio */}
-                <motion.div
-                  className="space-y-2"
-                  initial={{ opacity: 0, x: -15 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <Label htmlFor="bio">Bio</Label>
-                  <Textarea
-                    id="bio"
-                    value={profile.bio}
-                    onChange={(e) => setProfile((p) => ({ ...p, bio: e.target.value }))}
-                    placeholder="Tell us about yourself..."
-                    rows={3}
-                  />
-                </motion.div>
-
-                {/* Academic Level */}
-                <motion.div
-                  className="space-y-2"
-                  initial={{ opacity: 0, x: -15 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.25 }}
-                >
-                  <Label>Academic Level</Label>
-                  <Select
-                    value={profile.academic_level}
-                    onValueChange={(v) => setProfile((p) => ({ ...p, academic_level: v }))}
+                {[
+                  { label: "Display Name", id: "display_name", type: "input" as const, placeholder: "Your name", delay: 0.15 },
+                  { label: "Bio", id: "bio", type: "textarea" as const, placeholder: "Tell us about yourself...", delay: 0.2 },
+                  { label: "Academic Level", id: "academic_level", type: "select" as const, delay: 0.25 },
+                  { label: "Avatar URL", id: "avatar_url", type: "input" as const, placeholder: "https://example.com/avatar.png", delay: 0.3 },
+                ].map((field) => (
+                  <motion.div
+                    key={field.id}
+                    className="space-y-2"
+                    initial={{ opacity: 0, x: -15 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: field.delay }}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {academicLevels.map((l) => (
-                        <SelectItem key={l} value={l}>
-                          {l}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </motion.div>
+                    <Label htmlFor={field.id}>{field.label}</Label>
+                    {field.type === "textarea" ? (
+                      <Textarea
+                        id={field.id}
+                        value={profile[field.id as keyof ProfileData]}
+                        onChange={(e) => setProfile((p) => ({ ...p, [field.id]: e.target.value }))}
+                        placeholder={field.placeholder}
+                        rows={3}
+                      />
+                    ) : field.type === "select" ? (
+                      <Select
+                        value={profile.academic_level}
+                        onValueChange={(v) => setProfile((p) => ({ ...p, academic_level: v }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {academicLevels.map((l) => (
+                            <SelectItem key={l} value={l}>{l}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input
+                        id={field.id}
+                        value={profile[field.id as keyof ProfileData]}
+                        onChange={(e) => setProfile((p) => ({ ...p, [field.id]: e.target.value }))}
+                        placeholder={field.placeholder}
+                      />
+                    )}
+                  </motion.div>
+                ))}
 
-                {/* Avatar URL */}
-                <motion.div
-                  className="space-y-2"
-                  initial={{ opacity: 0, x: -15 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <Label htmlFor="avatar_url">Avatar URL</Label>
-                  <Input
-                    id="avatar_url"
-                    value={profile.avatar_url}
-                    onChange={(e) => setProfile((p) => ({ ...p, avatar_url: e.target.value }))}
-                    placeholder="https://example.com/avatar.png"
-                  />
-                </motion.div>
-
-                {/* Save */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.35 }}
-                >
-                  <Button onClick={handleSave} disabled={saving} className="w-full gap-2">
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+                  <Button onClick={handleSave} disabled={saving} className="w-full gap-2 gradient-primary text-primary-foreground hover:opacity-90 transition-opacity">
                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     {saving ? "Saving…" : "Save Changes"}
                   </Button>

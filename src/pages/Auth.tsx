@@ -45,24 +45,53 @@ export default function Auth() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
+        {/* Animated background blobs */}
         <motion.div
-          className="w-full max-w-md"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <div className="flex items-center justify-center gap-2 mb-8">
-            <Sparkles className="h-7 w-7 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">AI Mentor</h1>
-          </div>
+          className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full gradient-primary opacity-20 blur-3xl"
+          animate={{ x: [0, 40, 0], y: [0, 30, 0], scale: [1, 1.1, 1] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-[-20%] right-[-10%] w-[400px] h-[400px] rounded-full bg-accent opacity-15 blur-3xl"
+          animate={{ x: [0, -30, 0], y: [0, -40, 0], scale: [1, 1.15, 1] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
 
-          <Card>
+        <motion.div
+          className="w-full max-w-md relative z-10"
+          initial={{ opacity: 0, y: 30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <motion.div
+            className="flex items-center justify-center gap-2 mb-8"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <motion.div
+              animate={{ rotate: [0, 15, -15, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            >
+              <Sparkles className="h-8 w-8 text-primary" />
+            </motion.div>
+            <h1 className="text-3xl font-bold tracking-tight gradient-text">AI Mentor</h1>
+          </motion.div>
+
+          <Card className="glass glow-sm border-border/50">
             <CardHeader className="text-center">
-              <CardTitle>{isLogin ? "Welcome Back" : "Create Account"}</CardTitle>
-              <CardDescription>
-                {isLogin ? "Sign in to continue your learning journey" : "Join AI Mentor and start learning today"}
-              </CardDescription>
+              <motion.div
+                key={isLogin ? "login" : "signup"}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <CardTitle className="text-xl">{isLogin ? "Welcome Back" : "Create Account"}</CardTitle>
+                <CardDescription>
+                  {isLogin ? "Sign in to continue your learning journey" : "Join AI Mentor and start learning today"}
+                </CardDescription>
+              </motion.div>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -84,41 +113,24 @@ export default function Auth() {
                     />
                   </motion.div>
                 )}
-                <div className="space-y-2">
+                <motion.div className="space-y-2" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}>
                   <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
+                  <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                </motion.div>
+                <motion.div className="space-y-2" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
                   <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  {isLogin ? "Sign In" : "Create Account"}
-                </Button>
+                  <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+                </motion.div>
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+                  <Button type="submit" className="w-full gradient-primary text-primary-foreground hover:opacity-90 transition-opacity" disabled={loading}>
+                    {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    {isLogin ? "Sign In" : "Create Account"}
+                  </Button>
+                </motion.div>
               </form>
               <div className="mt-4 text-center text-sm text-muted-foreground">
                 {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-                <button
-                  type="button"
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="text-primary font-medium hover:underline"
-                >
+                <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-primary font-medium hover:underline">
                   {isLogin ? "Sign up" : "Sign in"}
                 </button>
               </div>

@@ -27,46 +27,71 @@ export default function RoadmapTab() {
   if (roadmap.length === 0) {
     return (
       <motion.div className="text-center py-20" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}>
-        <Map className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <h2 className="text-xl font-semibold text-foreground mb-2">Generate Your Learning Roadmap</h2>
-        <p className="text-muted-foreground mb-6">Get a personalized step-by-step path for {interest} at {level} level.</p>
-        <Button onClick={generate} disabled={loading}>
-          {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-          Generate Roadmap
-        </Button>
+        <motion.div
+          animate={{ y: [0, -8, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <Map className="h-14 w-14 text-primary mx-auto mb-4" />
+        </motion.div>
+        <h2 className="text-2xl font-bold gradient-text mb-2">Generate Your Learning Roadmap</h2>
+        <p className="text-muted-foreground mb-6">Get a personalized step-by-step path for <span className="text-primary font-medium">{interest}</span> at <span className="text-primary font-medium">{level}</span> level.</p>
+        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+          <Button onClick={generate} disabled={loading} className="gradient-primary text-primary-foreground px-8">
+            {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+            Generate Roadmap
+          </Button>
+        </motion.div>
       </motion.div>
     );
   }
 
   const completed = roadmap.filter((m) => m.completed).length;
+  const progress = Math.round((completed / roadmap.length) * 100);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{completed}/{roadmap.length} milestones completed</p>
+      <motion.div
+        className="flex items-center justify-between p-3 rounded-lg bg-card/60 border border-border/50"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-muted-foreground">{completed}/{roadmap.length} milestones</p>
+          <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+            <motion.div
+              className="h-full gradient-primary rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.5 }}
+            />
+          </div>
+        </div>
         <Button variant="outline" size="sm" onClick={generate} disabled={loading}>
           <RefreshCw className={`h-4 w-4 mr-1 ${loading ? "animate-spin" : ""}`} />
           Regenerate
         </Button>
-      </div>
+      </motion.div>
       {roadmap.map((milestone, i) => (
         <motion.div
           key={i}
-          initial={{ opacity: 0, x: -12 }}
+          initial={{ opacity: 0, x: -16 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: i * 0.05, duration: 0.3 }}
+          transition={{ delay: i * 0.06, duration: 0.3 }}
+          whileHover={{ x: 4 }}
         >
-          <Card className={`transition-opacity ${milestone.completed ? "opacity-60" : ""}`}>
+          <Card className={`transition-all duration-300 border-border/50 ${milestone.completed ? "opacity-60 bg-muted/30" : "hover:shadow-md hover:border-primary/20"}`}>
             <CardHeader className="pb-2 flex flex-row items-start gap-3">
               <Checkbox checked={milestone.completed} onCheckedChange={() => toggleMilestone(i)} className="mt-1" />
               <div>
-                <CardTitle className="text-base">{i + 1}. {milestone.title}</CardTitle>
+                <CardTitle className={`text-base ${milestone.completed ? "line-through" : ""}`}>
+                  <span className="text-primary font-bold mr-1">{i + 1}.</span> {milestone.title}
+                </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">{milestone.description}</p>
               </div>
             </CardHeader>
             {milestone.resources.length > 0 && (
               <CardContent className="pt-0 pl-12">
-                <p className="text-xs font-medium text-muted-foreground mb-1">Resources:</p>
+                <p className="text-xs font-medium text-primary/70 mb-1">Resources:</p>
                 <ul className="text-sm space-y-0.5">
                   {milestone.resources.map((r, j) => (
                     <li key={j} className="text-muted-foreground">• {r}</li>

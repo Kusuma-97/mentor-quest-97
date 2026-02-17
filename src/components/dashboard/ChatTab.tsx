@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
-import { Send, Mic, MicOff, Loader2 } from "lucide-react";
+import { Send, Mic, MicOff, Loader2, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function ChatTab() {
   const { interest, level, chatMessages, setChatMessages, addTopic } = useMentor();
@@ -31,9 +32,7 @@ export default function ChatTab() {
     const userMsg = { role: "user" as const, content: text };
     setChatMessages((prev) => [...prev, userMsg]);
     setIsLoading(true);
-
     addTopic(text.slice(0, 50));
-
     let assistantContent = "";
     const updateAssistant = (chunk: string) => {
       assistantContent += chunk;
@@ -45,7 +44,6 @@ export default function ChatTab() {
         return [...prev, { role: "assistant", content: assistantContent }];
       });
     };
-
     try {
       await streamChat({
         endpoint: "chat",
@@ -89,63 +87,101 @@ export default function ChatTab() {
   return (
     <div className="flex flex-col h-[calc(100vh-200px)]">
       {/* Controls */}
-      <div className="flex gap-6 mb-4 flex-wrap text-sm">
+      <motion.div
+        className="flex gap-6 mb-4 flex-wrap text-sm p-3 rounded-lg bg-card/60 border border-border/50 backdrop-blur-sm"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
         <div className="flex items-center gap-2 min-w-[200px]">
           <span className="text-muted-foreground whitespace-nowrap">Creativity:</span>
           <Slider value={[temperature]} onValueChange={([v]) => setTemperature(v)} min={0} max={1} step={0.1} className="flex-1" />
-          <span className="text-muted-foreground w-8">{temperature}</span>
+          <span className="text-primary font-medium w-8">{temperature}</span>
         </div>
         <div className="flex items-center gap-2 min-w-[200px]">
           <span className="text-muted-foreground whitespace-nowrap">Length:</span>
           <Slider value={[maxTokens]} onValueChange={([v]) => setMaxTokens(v)} min={256} max={4096} step={256} className="flex-1" />
-          <span className="text-muted-foreground w-12">{maxTokens}</span>
+          <span className="text-primary font-medium w-12">{maxTokens}</span>
         </div>
-      </div>
+      </motion.div>
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-3 mb-4 pr-1">
         {chatMessages.length === 0 && (
-          <div className="text-center text-muted-foreground py-20">
-            <p className="text-lg">Ask me anything about <span className="font-medium text-foreground">{interest}</span>!</p>
-            <p className="text-sm mt-1">I'll guide you as your personal AI mentor.</p>
-          </div>
+          <motion.div
+            className="text-center py-20"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            >
+              <Sparkles className="h-10 w-10 text-primary mx-auto mb-4" />
+            </motion.div>
+            <p className="text-lg">Ask me anything about <span className="font-semibold gradient-text">{interest}</span>!</p>
+            <p className="text-sm mt-1 text-muted-foreground">I'll guide you as your personal AI mentor.</p>
+          </motion.div>
         )}
-        {chatMessages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-            <Card className={`max-w-[80%] px-4 py-3 ${msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
-              {msg.role === "assistant" ? (
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                  <ReactMarkdown>{msg.content}</ReactMarkdown>
-                </div>
-              ) : (
-                <p>{msg.content}</p>
-              )}
-            </Card>
-          </div>
-        ))}
+        <AnimatePresence>
+          {chatMessages.map((msg, i) => (
+            <motion.div
+              key={i}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.25 }}
+            >
+              <Card className={`max-w-[80%] px-4 py-3 ${
+                msg.role === "user"
+                  ? "gradient-primary text-primary-foreground"
+                  : "bg-card border-border/50"
+              }`}>
+                {msg.role === "assistant" ? (
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                ) : (
+                  <p>{msg.content}</p>
+                )}
+              </Card>
+            </motion.div>
+          ))}
+        </AnimatePresence>
         {isLoading && chatMessages[chatMessages.length - 1]?.role !== "assistant" && (
-          <div className="flex justify-start">
-            <Card className="px-4 py-3 bg-muted"><Loader2 className="h-4 w-4 animate-spin" /></Card>
-          </div>
+          <motion.div className="flex justify-start" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <Card className="px-4 py-3 bg-card border-border/50">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            </Card>
+          </motion.div>
         )}
       </div>
 
       {/* Input */}
-      <div className="flex gap-2">
-        <Button variant="outline" size="icon" onClick={toggleVoice} className={listening ? "text-destructive" : ""}>
-          {listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-        </Button>
+      <motion.div
+        className="flex gap-2"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Button variant="outline" size="icon" onClick={toggleVoice} className={listening ? "text-destructive border-destructive/50" : "border-border/50"}>
+            {listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+          </Button>
+        </motion.div>
         <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask your mentor..."
-          className="min-h-[44px] max-h-[120px] resize-none"
+          className="min-h-[44px] max-h-[120px] resize-none border-border/50"
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
         />
-        <Button onClick={handleSend} disabled={isLoading || !input.trim()} size="icon">
-          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-        </Button>
-      </div>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Button onClick={handleSend} disabled={isLoading || !input.trim()} size="icon" className="gradient-primary text-primary-foreground">
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </Button>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

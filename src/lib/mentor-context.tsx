@@ -46,9 +46,13 @@ export function MentorProvider({ children }: { children: React.ReactNode }) {
   const [level, setLevel] = useState<Level | null>(null);
   const [chatsByDomain, setChatsByDomain] = useState<Record<string, ChatMessage[]>>({});
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
-  const [roadmap, setRoadmap] = useState<RoadmapMilestone[]>([]);
+  const [roadmapsByDomain, setRoadmapsByDomain] = useState<Record<string, RoadmapMilestone[]>>({});
   const [topicsExplored, setTopicsExplored] = useState<string[]>([]);
   const domainKey = interest ?? "";
+  const roadmap = roadmapsByDomain[domainKey] ?? [];
+  const setRoadmap = useCallback((r: RoadmapMilestone[]) => {
+    setRoadmapsByDomain((prev) => ({ ...prev, [domainKey]: r }));
+  }, [domainKey]);
   const chatMessages = chatsByDomain[domainKey] ?? [];
   const setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>> = useCallback(
     (action) => {
@@ -66,10 +70,11 @@ export function MentorProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const toggleMilestone = useCallback((index: number) => {
-    setRoadmap((prev) =>
-      prev.map((m, i) => (i === index ? { ...m, completed: !m.completed } : m))
-    );
-  }, []);
+    setRoadmapsByDomain((prev) => {
+      const current = prev[domainKey] ?? [];
+      return { ...prev, [domainKey]: current.map((m, i) => (i === index ? { ...m, completed: !m.completed } : m)) };
+    });
+  }, [domainKey]);
 
   const addTopic = useCallback((t: string) => {
     setTopicsExplored((prev) => (prev.includes(t) ? prev : [...prev, t]));

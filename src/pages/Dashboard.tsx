@@ -4,7 +4,7 @@ import { useMentor } from "@/lib/mentor-context";
 import { useAuth } from "@/lib/auth-context";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Map, HelpCircle, BarChart3, Home, User, LogOut } from "lucide-react";
+import { MessageSquare, Map, HelpCircle, BarChart3, Home, User, LogOut, Sun, Moon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import ChatTab from "@/components/dashboard/ChatTab";
 import RoadmapTab from "@/components/dashboard/RoadmapTab";
@@ -18,6 +18,13 @@ export default function Dashboard() {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("chat");
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
+
+  const toggleTheme = () => {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle("dark", next);
+  };
 
   useEffect(() => {
     if (!interest || !level) navigate("/");
@@ -53,7 +60,19 @@ export default function Dashboard() {
             </motion.div>
             <Tooltip>
               <TooltipTrigger asChild>
-                <motion.button onClick={() => navigate("/")} className="ml-2 text-muted-foreground hover:text-primary transition-colors" whileHover={{ scale: 1.15, rotate: 5 }} whileTap={{ scale: 0.9 }}>
+                <motion.button onClick={toggleTheme} className="ml-2 text-muted-foreground hover:text-primary transition-colors" whileHover={{ scale: 1.15, rotate: 20 }} whileTap={{ scale: 0.9 }}>
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span key={dark ? "moon" : "sun"} initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                      {dark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                    </motion.span>
+                  </AnimatePresence>
+                </motion.button>
+              </TooltipTrigger>
+              <TooltipContent>{dark ? "Light mode" : "Dark mode"}</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.button onClick={() => navigate("/")} className="text-muted-foreground hover:text-primary transition-colors" whileHover={{ scale: 1.15, rotate: 5 }} whileTap={{ scale: 0.9 }}>
                   <Home className="h-4 w-4" />
                 </motion.button>
               </TooltipTrigger>
@@ -92,7 +111,7 @@ export default function Dashboard() {
                   <TabsTrigger
                     key={value}
                     value={value}
-                    className="gap-2 relative px-4 py-2.5 font-semibold transition-all duration-300 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25"
+                    className="gap-2 relative px-4 py-2.5 font-semibold transition-all duration-300 text-muted-foreground data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25"
                   >
                     <motion.div
                       className="flex items-center gap-2"

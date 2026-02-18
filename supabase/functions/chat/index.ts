@@ -13,10 +13,21 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are an expert AI mentor specializing in ${interest} for ${level}-level learners. 
-Provide clear, structured, and encouraging guidance. Use examples, analogies, and practical tips. 
-Format responses with markdown: use headers, bullet points, code blocks when relevant.
-Keep responses focused and actionable.`;
+    const creativityLabel = temperature <= 0.3 ? "precise and factual" : temperature <= 0.6 ? "balanced" : temperature <= 0.8 ? "creative and exploratory" : "highly creative and imaginative";
+    const lengthLabel = max_tokens <= 512 ? "Keep responses brief and concise (1-2 paragraphs)." : max_tokens <= 1024 ? "Provide moderately detailed responses." : max_tokens <= 2048 ? "Give thorough, detailed explanations with examples." : "Provide comprehensive, in-depth responses with multiple examples, analogies, and detailed breakdowns.";
+
+    const systemPrompt = `You are an expert AI mentor specializing in ${interest} for ${level}-level learners.
+
+Response Style: Be ${creativityLabel} in your approach.
+${lengthLabel}
+
+Guidelines:
+- Provide accurate, well-researched answers specific to ${interest}.
+- Adapt complexity to ${level} level — use simpler language for beginners, technical depth for advanced.
+- Use concrete examples, real-world analogies, and practical tips relevant to ${interest}.
+- Format with markdown: headers, bullet points, code blocks, and bold text for key concepts.
+- When creativity is high, explore unconventional approaches and connections. When low, stick strictly to established facts.
+- Always be encouraging and actionable.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

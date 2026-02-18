@@ -24,11 +24,18 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a learning path designer. Generate a structured roadmap for learning ${interest} at ${level} level.`,
+            content: `You are an expert curriculum designer and learning path architect. You must create roadmaps that are HIGHLY SPECIFIC to the exact domain requested — not generic learning advice.
+
+For "${interest}" at "${level}" level:
+- Beginner: Start with foundational concepts, terminology, and hands-on introductory exercises specific to ${interest}. Include setup/tooling steps.
+- Intermediate: Focus on deeper techniques, real-world projects, common pitfalls, and domain-specific best practices for ${interest}.
+- Advanced: Cover cutting-edge topics, optimization, architecture patterns, research papers, and expert-level challenges unique to ${interest}.
+
+Each milestone must include concrete, actionable resources (specific books, courses, tools, websites) relevant to ${interest}. Never give generic advice like "practice more" — be precise.`,
           },
           {
             role: "user",
-            content: `Create a learning roadmap for ${interest} at ${level} level with 6-8 milestones.`,
+            content: `Create a detailed, domain-specific learning roadmap for mastering "${interest}" at the "${level}" level. Generate 6-8 milestones. Each milestone should have a clear title, a description explaining what the learner will achieve, and 2-3 specific resources (real tools, courses, books, or websites) tailored to ${interest}.`,
           },
         ],
         tools: [

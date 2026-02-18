@@ -82,21 +82,40 @@ export default function Dashboard() {
         <main className="max-w-5xl mx-auto px-4 py-6 relative z-10">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-              <TabsList className="w-full justify-start mb-6 bg-card/60 backdrop-blur-sm p-1.5 border border-border/50">
+              <TabsList className="w-full justify-start mb-6 bg-card/60 backdrop-blur-sm p-2 border border-border/50 gap-1">
                 {[
                   { value: "chat", icon: MessageSquare, label: "Chat" },
                   { value: "roadmap", icon: Map, label: "Roadmap" },
                   { value: "quiz", icon: HelpCircle, label: "Quiz" },
                   { value: "progress", icon: BarChart3, label: "Progress" },
                 ].map(({ value, icon: Icon, label }) => (
-                  <TabsTrigger key={value} value={value} className="gap-1.5 relative data-[state=active]:text-primary-foreground transition-all">
-                    <Icon className="h-4 w-4" />
-                    {label}
+                  <TabsTrigger
+                    key={value}
+                    value={value}
+                    className="gap-2 relative px-4 py-2.5 font-semibold transition-all duration-300 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25"
+                  >
+                    <motion.div
+                      className="flex items-center gap-2"
+                      animate={activeTab === value ? { scale: 1.05 } : { scale: 1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    >
+                      <Icon className={`h-4 w-4 transition-all duration-300 ${activeTab === value ? "drop-shadow-[0_0_6px_hsl(var(--primary)/0.6)]" : ""}`} />
+                      {label}
+                    </motion.div>
                     {activeTab === value && (
                       <motion.div
                         layoutId="activeTabIndicator"
                         className="absolute inset-0 rounded-md gradient-primary -z-10"
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        initial={false}
+                        transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                      />
+                    )}
+                    {activeTab === value && (
+                      <motion.div
+                        layoutId="activeTabGlow"
+                        className="absolute -bottom-1 left-1/4 right-1/4 h-0.5 rounded-full bg-primary blur-sm"
+                        initial={false}
+                        transition={{ type: "spring", stiffness: 500, damping: 35 }}
                       />
                     )}
                   </TabsTrigger>

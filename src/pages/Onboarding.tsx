@@ -4,10 +4,10 @@ import { useMentor, Interest, Level } from "@/lib/mentor-context";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Code, Database, Brain, Palette, Smartphone, Shield, Sparkles, Home, User, LogOut } from "lucide-react";
+import { Code, Database, Brain, Palette, Smartphone, Shield, Sparkles, Home, User, LogOut, Sun, Moon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import PageTransition from "@/components/PageTransition";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const interests: { label: Interest; icon: React.ElementType; desc: string; color: string }[] = [
   { label: "Web Development", icon: Code, desc: "HTML, CSS, JS, React & more", color: "250 76% 58%" },
@@ -34,7 +34,14 @@ export default function Onboarding() {
   const { signOut } = useAuth();
   const [selectedInterest, setSelectedInterest] = useState<Interest | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<Level | null>(null);
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
   const navigate = useNavigate();
+
+  const toggleTheme = () => {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle("dark", next);
+  };
 
   const handleStart = () => {
     if (!selectedInterest || !selectedLevel) return;
@@ -65,6 +72,18 @@ export default function Onboarding() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <motion.button onClick={toggleTheme} className="text-muted-foreground hover:text-primary transition-colors" whileHover={{ scale: 1.15, rotate: 20 }} whileTap={{ scale: 0.9 }}>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span key={dark ? "moon" : "sun"} initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                    {dark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                  </motion.span>
+                </AnimatePresence>
+              </motion.button>
+            </TooltipTrigger>
+            <TooltipContent>{dark ? "Light mode" : "Dark mode"}</TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <motion.button onClick={() => navigate("/dashboard")} className="text-muted-foreground hover:text-primary transition-colors" whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>

@@ -9,10 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Sun, Moon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PageTransition from "@/components/PageTransition";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ProfileData {
   display_name: string;
@@ -32,6 +33,13 @@ export default function Profile() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
+
+  const toggleTheme = () => {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle("dark", next);
+  };
   const [profile, setProfile] = useState<ProfileData>({
     display_name: "", bio: "", academic_level: "", avatar_url: "",
   });
@@ -111,6 +119,20 @@ export default function Profile() {
             <ArrowLeft className="h-5 w-5" />
           </motion.button>
           <h1 className="text-xl font-bold gradient-text">My Profile</h1>
+          <div className="ml-auto">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.button onClick={toggleTheme} className="text-muted-foreground hover:text-primary transition-colors" whileHover={{ scale: 1.15, rotate: 20 }} whileTap={{ scale: 0.9 }}>
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span key={dark ? "moon" : "sun"} initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                      {dark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                    </motion.span>
+                  </AnimatePresence>
+                </motion.button>
+              </TooltipTrigger>
+              <TooltipContent>{dark ? "Light mode" : "Dark mode"}</TooltipContent>
+            </Tooltip>
+          </div>
         </motion.header>
 
         <main className="max-w-2xl mx-auto px-4 py-8 relative z-10">

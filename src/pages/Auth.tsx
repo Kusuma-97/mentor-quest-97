@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, Sun, Moon } from "lucide-react";
 import { toast } from "sonner";
 import PageTransition from "@/components/PageTransition";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,8 +16,15 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+
+  const toggleTheme = () => {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle("dark", next);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +53,19 @@ export default function Auth() {
   return (
     <PageTransition>
       <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
+        {/* Theme toggle */}
+        <motion.button
+          onClick={toggleTheme}
+          className="absolute top-4 right-4 z-20 text-muted-foreground hover:text-primary transition-colors"
+          whileHover={{ scale: 1.15, rotate: 20 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span key={dark ? "moon" : "sun"} initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+              {dark ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            </motion.span>
+          </AnimatePresence>
+        </motion.button>
         {/* Animated background blobs */}
         <motion.div
           className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full gradient-primary opacity-20 blur-3xl"

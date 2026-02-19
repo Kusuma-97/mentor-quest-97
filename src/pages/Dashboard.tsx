@@ -111,7 +111,7 @@ export default function Dashboard() {
                   <TabsTrigger
                     key={value}
                     value={value}
-                    className="gap-2 relative px-4 py-2.5 font-semibold transition-all duration-300 text-muted-foreground data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25"
+                    className="gap-2 relative px-4 py-2.5 font-semibold transition-all duration-300 text-muted-foreground data-[state=active]:text-white data-[state=active]:font-extrabold data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 data-[state=active]:drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)]"
                   >
                     <motion.div
                       className="flex items-center gap-2"

@@ -19,9 +19,18 @@ export type Database = {
           academic_level: string | null
           avatar_url: string | null
           bio: string | null
+          city: string | null
+          country: string | null
           created_at: string
           display_name: string | null
+          github_url: string | null
           id: string
+          learning_goals: string | null
+          linkedin_url: string | null
+          phone: string | null
+          preferred_subjects: string[] | null
+          study_hours_per_week: number | null
+          twitter_url: string | null
           updated_at: string
           user_id: string
         }
@@ -29,9 +38,18 @@ export type Database = {
           academic_level?: string | null
           avatar_url?: string | null
           bio?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           display_name?: string | null
+          github_url?: string | null
           id?: string
+          learning_goals?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          preferred_subjects?: string[] | null
+          study_hours_per_week?: number | null
+          twitter_url?: string | null
           updated_at?: string
           user_id: string
         }
@@ -39,9 +57,18 @@ export type Database = {
           academic_level?: string | null
           avatar_url?: string | null
           bio?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           display_name?: string | null
+          github_url?: string | null
           id?: string
+          learning_goals?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          preferred_subjects?: string[] | null
+          study_hours_per_week?: number | null
+          twitter_url?: string | null
           updated_at?: string
           user_id?: string
         }
